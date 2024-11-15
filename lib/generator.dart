@@ -15,12 +15,27 @@ class Generator {
     };
     var prompt = 'Generate a Conventional Commits style commit message for '
         'the following git diff.';
+    var schema = {
+      "description": 'Conventional commit message',
+      'name': 'commit',
+      'strict': true,
+      'schema': {
+        'type': 'object',
+        'properties': {
+          'commit': {
+            'description': 'commit message',
+            'type': 'string',
+          }
+        }
+      }
+    };
     var body = {
       'messages': [
         {'role': 'system', 'content': prompt},
         {'role': 'user', 'content': difference}
       ],
       'model': config.model,
+      'response_format': {'type': 'json_schema', 'json_schema': schema}
     };
     var response = await post(
       Uri.parse(url),
@@ -35,8 +50,12 @@ class Generator {
 
   static String _getContent(Map<String, dynamic> json) {
     var content = json['choices'][0]['message']['content'];
-    var formattedContent = jsonDecode(content);
-    return formattedContent['commit'];
+    try {
+      var formattedContent = jsonDecode(content);
+      return formattedContent['commit'];
+    } catch (error) {
+      return content;
+    }
   }
 
   static GeneratorException _getException(Map<String, dynamic> json) {
