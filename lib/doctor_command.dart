@@ -3,11 +3,12 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:auto_commit/config.dart';
-import 'package:auto_commit/spinner.dart';
+import 'package:cli_spin/cli_spin.dart';
 import 'package:http/http.dart';
 
 class DoctorCommand extends Command {
-  List<String> _errors = [];
+  final List<String> _errors = [];
+  final _spinner = CliSpin(spinner: CliSpinners.dots5);
 
   @override
   String get description => 'Show information about the flit configuration';
@@ -17,26 +18,25 @@ class DoctorCommand extends Command {
 
   @override
   Future<void> run() async {
+    _spinner.start();
     var config = await Config.load();
-    var spinner = Spinner();
-    spinner.start();
-    _checkAPIKey(spinner, config);
-    _checkEndpoint(spinner, config);
-    _checkModel(spinner, config);
-    await _checkNetwork(spinner, config);
-    spinner.stop();
+    _checkAPIKey(config);
+    _checkEndpoint(config);
+    _checkModel(config);
+    await _checkNetwork(config);
+    _spinner.stop();
     if (_errors.isNotEmpty) {
       for (var error in _errors) {
-        stdout.writeln('\n• $error');
+        stdout.writeln('\n\x1B[31m• $error\x1B[0m');
       }
       return;
     }
     stdout.writeln('\n✨ No issues found');
   }
 
-  void _checkAPIKey(Spinner spinner, Config config) {
+  void _checkAPIKey(Config config) {
     var apiKey = config.apiKey;
-    if (apiKey.isEmpty) return _error(spinner, 'API Key not set');
+    if (apiKey.isEmpty) return _fail('API Key not set');
     var length = apiKey.length;
     if (length > 13) {
       var prefix = apiKey.substring(0, 7);
@@ -44,33 +44,32 @@ class DoctorCommand extends Command {
       var encrypted = List.generate(length - 13, (index) => '*');
       apiKey = prefix + encrypted.join() + suffix;
     }
-    spinner.update('API Key: $apiKey');
-    spinner.next();
+    _spinner.success('API Key: $apiKey');
+    _spinner.start();
   }
 
-  void _checkEndpoint(Spinner spinner, Config config) {
-    if (config.endpoint.isEmpty) return _error(spinner, 'Endpoint not set');
-    spinner.update('Endpoint: ${config.endpoint}');
-    spinner.next();
+  void _checkEndpoint(Config config) {
+    if (config.endpoint.isEmpty) return _fail('Endpoint not set');
+    _spinner.success('Endpoint: ${config.endpoint}');
+    _spinner.start();
   }
 
-  void _checkModel(Spinner spinner, Config config) {
-    if (config.model.isEmpty) return _error(spinner, 'Model not set');
-    spinner.update('Model: ${config.model}');
-    spinner.next();
+  void _checkModel(Config config) {
+    if (config.model.isEmpty) return _fail('Model not set');
+    _spinner.success('Model: ${config.model}');
+    _spinner.start();
   }
 
-  Future<void> _checkNetwork(Spinner spinner, Config config) async {
-    spinner.update('');
+  Future<void> _checkNetwork(Config config) async {
+    _spinner.text = '';
     var response = await _connect(config);
     if (response.statusCode != 200) {
       var json = jsonDecode(response.body);
       var error = json['error']['message'];
-      _error(spinner, 'Network connectivity failed', error: error);
+      _fail('Network connectivity failed', error: error);
       return;
     }
-    spinner.update('Network connectivity');
-    spinner.next();
+    _spinner.success('Network connectivity');
   }
 
   Future<Response> _connect(Config config) async {
@@ -92,9 +91,8 @@ class DoctorCommand extends Command {
     );
   }
 
-  void _error(Spinner spinner, String message, {String? error}) {
-    spinner.update(message);
-    spinner.next(success: false);
+  void _fail(String message, {String? error}) {
+    _spinner.fail(message);
     _errors.add(error ?? message);
   }
 }

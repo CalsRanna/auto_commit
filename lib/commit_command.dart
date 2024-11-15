@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:auto_commit/config.dart';
 import 'package:auto_commit/generator.dart';
-import 'package:auto_commit/spinner.dart';
+import 'package:cli_spin/cli_spin.dart';
 import 'package:process_run/process_run.dart';
 
 class CommitCommand extends Command {
@@ -22,21 +22,21 @@ class CommitCommand extends Command {
   @override
   String get name => 'commit';
 
+  final _spinner = CliSpin(spinner: CliSpinners.dots5);
+
   @override
   Future<void> run() async {
     stdout.writeln('\n✧ ────────────── AUTO COMMIT ────────────── ✧\n');
-    var spinner = Spinner();
-    spinner.start();
-    spinner.update('Analyzing changes');
+    _spinner.start('Analyzing changes');
     var difference = await _differentiate();
-    spinner.next();
-    if (difference.isEmpty) return _terminate(spinner);
-    spinner.update('Generating commit message');
+    if (difference.isEmpty) return _terminate();
+    _spinner.success();
+    _spinner.start('Generating commit message');
     var config = await Config.load();
     try {
       var message = await Generator.generate(difference, config: config);
-      spinner.next();
-      spinner.stop();
+      _spinner.success();
+      _spinner.stop();
       stdout.writeln('\n∙ ───────────────────────────────────────── ∙');
       stdout.writeln('\tGenerated Commit Message\t');
       stdout.writeln('∙ ───────────────────────────────────────── ∙\n');
@@ -47,13 +47,13 @@ class CommitCommand extends Command {
       if (answer == 'y') return _commit(message);
       stdout.writeln('\n⭕ Commit cancelled.');
     } on GeneratorException catch (error) {
-      spinner.next(success: false);
-      spinner.stop();
-      stdout.writeln('\n🚫 Operation failed: [${error.code}] ${error.message}');
+      _spinner.fail();
+      _spinner.stop();
+      stdout.writeln('\n\x1B[31m• [${error.code}] ${error.message}\x1B[0m');
     } catch (error) {
-      spinner.next(success: false);
-      spinner.stop();
-      stdout.writeln('\n🚫 Operation failed: $error');
+      _spinner.fail();
+      _spinner.stop();
+      stdout.writeln('\n\x1B[31m• $error\x1B[0m');
     }
   }
 
@@ -74,8 +74,8 @@ class CommitCommand extends Command {
     return difference;
   }
 
-  void _terminate(Spinner spinner) {
-    spinner.stop();
-    stdout.writeln('🔍 Nothing to commit');
+  void _terminate() {
+    _spinner.success();
+    stdout.writeln('\n\x1B[31m• Nothing to commit\x1B[0m');
   }
 }
