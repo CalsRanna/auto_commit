@@ -7,6 +7,8 @@ import 'package:cli_spin/cli_spin.dart';
 import 'package:process_run/process_run.dart';
 
 class CommitCommand extends Command {
+  final _spinner = CliSpin(spinner: CliSpinners.dots5);
+
   CommitCommand() {
     argParser.addFlag(
       'yes',
@@ -22,14 +24,12 @@ class CommitCommand extends Command {
   @override
   String get name => 'commit';
 
-  final _spinner = CliSpin(spinner: CliSpinners.dots5);
-
   @override
   Future<void> run() async {
     stdout.writeln('\n✧ ────────────── AUTO COMMIT ────────────── ✧\n');
     _spinner.start('Analyzing changes');
     var difference = await _differentiate();
-    if (difference.isEmpty) return _terminate();
+    if (difference.isEmpty) return _fail('Nothing to commit');
     _spinner.success();
     _spinner.start('Generating commit message');
     var config = await Config.load();
@@ -47,13 +47,9 @@ class CommitCommand extends Command {
       if (answer == 'y') return _commit(message);
       stdout.writeln('\n⭕ Commit cancelled.');
     } on GeneratorException catch (error) {
-      _spinner.fail();
-      _spinner.stop();
-      stdout.writeln('\n\x1B[31m• [${error.code}] ${error.message}\x1B[0m');
+      _fail('[${error.code}] ${error.message}');
     } catch (error) {
-      _spinner.fail();
-      _spinner.stop();
-      stdout.writeln('\n\x1B[31m• $error\x1B[0m');
+      _fail('$error');
     }
   }
 
@@ -74,9 +70,9 @@ class CommitCommand extends Command {
     return difference;
   }
 
-  void _terminate() {
-    _spinner.success();
+  void _fail(String message) {
+    _spinner.fail();
     _spinner.stop();
-    stdout.writeln('\n\x1B[31m• Nothing to commit\x1B[0m');
+    stdout.writeln('\n\x1B[31m• $message\x1B[0m');
   }
 }
