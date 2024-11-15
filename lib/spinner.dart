@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 class Spinner {
-  final _frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+  final _frames = ['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'];
   Timer? _timer;
   bool _running = false;
   String _message = '';

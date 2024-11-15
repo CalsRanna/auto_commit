@@ -14,7 +14,7 @@ class Generator {
       'Content-Type': 'application/json'
     };
     var prompt = 'Generate a Conventional Commits style commit message for '
-        'the following git diff.';
+        'the following git diff. Only output the commit message, no other text.';
     var schema = {
       "description": 'Conventional commit message',
       'name': 'commit',
