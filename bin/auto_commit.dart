@@ -1,6 +1,7 @@
 import 'package:args/command_runner.dart';
 import 'package:auto_commit/commit_command.dart';
 import 'package:auto_commit/config_command.dart';
+import 'package:auto_commit/doctor_command.dart';
 import 'package:auto_commit/version_command.dart';
 
 Future<void> main(List<String> arguments) async {
@@ -9,6 +10,7 @@ Future<void> main(List<String> arguments) async {
   var runner = CommandRunner(executable, description)
     ..addCommand(CommitCommand())
     ..addCommand(ConfigCommand())
+    ..addCommand(DoctorCommand())
     ..addCommand(VersionCommand());
   runner.argParser.addFlag(
     'version',
