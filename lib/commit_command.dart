@@ -24,32 +24,41 @@ class CommitCommand extends Command {
 
   @override
   Future<void> run() async {
+    stdout.writeln('\n✧ ────────────── AUTO COMMIT ────────────── ✧\n');
     var spinner = Spinner();
     spinner.start();
     spinner.update('Analyzing changes...');
-    var shell = Shell(verbose: false);
-    var result = await shell.run('git diff --staged');
-    var difference = result.first.stdout.toString();
-    await Future.delayed(const Duration(seconds: 1));
+    var difference = await _differentiate();
     if (difference.isEmpty) return _terminate(spinner);
     spinner.update('Generating commit message...');
     var config = await Config.load();
     try {
       var message = await Generator.generate(difference, config: config);
       spinner.stop();
-      stdout.writeln('\nCommit message:\n');
-      stdout.writeln(message);
+      stdout.writeln('\n∙ ───────────────────────────────────────── ∙');
+      stdout.writeln('\tGenerated Commit Message\t');
+      stdout.writeln('∙ ───────────────────────────────────────── ∙\n');
+      stdout.writeln('\x1B[32m$message\x1B[0m');
       if (argResults?['yes'] == true) return _commit(message);
-      stdout.write('Do you want to use this message? [y/n] ');
+      stdout.write('\n⟩ Do you want to use this message? [y/n] ');
       var answer = stdin.readLineSync();
       if (answer == 'y') return _commit(message);
+      stdout.writeln('\n⭕ Commit cancelled.');
     } on GeneratorException catch (error) {
       spinner.stop();
-      stdout.writeln('\n[${error.code}] ${error.message}');
+      stdout.writeln('\n🚫 Operation failed: [${error.code}] ${error.message}');
     } catch (error) {
       spinner.stop();
-      stdout.writeln('\nAn error occurred: $error');
+      stdout.writeln('\n🚫 Operation failed: $error');
     }
+  }
+
+  Future<String> _differentiate() async {
+    var shell = Shell(verbose: false);
+    var result = await shell.run('git diff --staged');
+    var difference = result.first.stdout.toString();
+    await Future.delayed(const Duration(milliseconds: 500));
+    return difference;
   }
 
   Future<void> _commit(String message) async {
@@ -58,11 +67,11 @@ class CommitCommand extends Command {
     var shell = Shell(verbose: false);
     await shell.run('git commit -F .commit');
     await file.delete();
-    stdout.writeln('\nCommit successful.');
+    stdout.writeln('\n✨ Commit completed');
   }
 
   void _terminate(Spinner spinner) {
     spinner.stop();
-    stdout.writeln('No changes detected.');
+    stdout.writeln('🔍 Nothing to commit');
   }
 }
