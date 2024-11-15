@@ -7,12 +7,6 @@ import 'package:auto_commit/spinner.dart';
 import 'package:process_run/process_run.dart';
 
 class CommitCommand extends Command {
-  @override
-  String get description => 'Generate Conventional Commits by AI';
-
-  @override
-  String get name => 'commit';
-
   CommitCommand() {
     argParser.addFlag(
       'yes',
@@ -21,6 +15,12 @@ class CommitCommand extends Command {
       negatable: false,
     );
   }
+
+  @override
+  String get description => 'Generate Conventional Commits by AI';
+
+  @override
+  String get name => 'commit';
 
   @override
   Future<void> run() async {
@@ -53,14 +53,6 @@ class CommitCommand extends Command {
     }
   }
 
-  Future<String> _differentiate() async {
-    var shell = Shell(verbose: false);
-    var result = await shell.run('git diff --staged');
-    var difference = result.first.stdout.toString();
-    await Future.delayed(const Duration(milliseconds: 500));
-    return difference;
-  }
-
   Future<void> _commit(String message) async {
     var file = File('.commit');
     await file.writeAsString(message);
@@ -68,6 +60,14 @@ class CommitCommand extends Command {
     await shell.run('git commit -F .commit');
     await file.delete();
     stdout.writeln('\n✨ Commit completed');
+  }
+
+  Future<String> _differentiate() async {
+    var shell = Shell(verbose: false);
+    var result = await shell.run('git diff --staged');
+    var difference = result.first.stdout.toString();
+    await Future.delayed(const Duration(milliseconds: 500));
+    return difference;
   }
 
   void _terminate(Spinner spinner) {

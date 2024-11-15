@@ -15,18 +15,6 @@ class Config {
     this.model = 'gpt-4o',
   });
 
-  static Future<Config> load() async {
-    var file = await _findConfigFile();
-    if (file == null) return Config();
-    var content = await file.readAsString();
-    var yaml = loadYaml(content);
-    return Config(
-      apiKey: yaml['apiKey']?.toString() ?? 'YOUR_API_KEY',
-      endpoint: yaml['endpoint']?.toString() ?? 'https://api.openai.com',
-      model: yaml['model']?.toString() ?? 'gpt-4o',
-    );
-  }
-
   Future<void> save() async {
     var currentDirectory = Directory.current;
     var homeDirectory = Platform.environment['HOME'];
@@ -41,6 +29,18 @@ class Config {
       'model: $model',
     ];
     await file.writeAsString(parts.join('\n'));
+  }
+
+  static Future<Config> load() async {
+    var file = await _findConfigFile();
+    if (file == null) return Config();
+    var content = await file.readAsString();
+    var yaml = loadYaml(content);
+    return Config(
+      apiKey: yaml['apiKey']?.toString() ?? 'YOUR_API_KEY',
+      endpoint: yaml['endpoint']?.toString() ?? 'https://api.openai.com',
+      model: yaml['model']?.toString() ?? 'gpt-4o',
+    );
   }
 
   static Future<File?> _findConfigFile() async {
