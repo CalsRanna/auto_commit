@@ -27,13 +27,15 @@ class CommitCommand extends Command {
     stdout.writeln('\n✧ ────────────── AUTO COMMIT ────────────── ✧\n');
     var spinner = Spinner();
     spinner.start();
-    spinner.update('Analyzing changes...');
+    spinner.update('Analyzing changes');
     var difference = await _differentiate();
+    spinner.next();
     if (difference.isEmpty) return _terminate(spinner);
-    spinner.update('Generating commit message...');
+    spinner.update('Generating commit message');
     var config = await Config.load();
     try {
       var message = await Generator.generate(difference, config: config);
+      spinner.next();
       spinner.stop();
       stdout.writeln('\n∙ ───────────────────────────────────────── ∙');
       stdout.writeln('\tGenerated Commit Message\t');
@@ -45,9 +47,11 @@ class CommitCommand extends Command {
       if (answer == 'y') return _commit(message);
       stdout.writeln('\n⭕ Commit cancelled.');
     } on GeneratorException catch (error) {
+      spinner.next(success: false);
       spinner.stop();
       stdout.writeln('\n🚫 Operation failed: [${error.code}] ${error.message}');
     } catch (error) {
+      spinner.next(success: false);
       spinner.stop();
       stdout.writeln('\n🚫 Operation failed: $error');
     }
