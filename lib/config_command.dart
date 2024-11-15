@@ -9,8 +9,7 @@ class ConfigCommand extends Command {
       ..addOption('set-api-key', help: 'Set the API key')
       ..addOption('set-endpoint', help: 'Set the API endpoint')
       ..addOption('set-model', help: 'Set the model')
-      ..addFlag('show', help: 'Show current configuration')
-      ..addFlag('init', help: 'Create a new configuration file');
+      ..addFlag('show', help: 'Show current configuration');
   }
 
   @override
@@ -26,24 +25,6 @@ class ConfigCommand extends Command {
     if (argResults?['set-endpoint'] != null) return _setEndpoint(config);
     if (argResults?['set-model'] != null) return _setModel(config);
     if (argResults?['show'] == true) return _show(config);
-    if (argResults?['init'] == true) return _init(config);
-  }
-
-  Future<void> _init(Config config) async {
-    var currentDirectory = Directory.current;
-    var homeDirectory = Platform.environment['HOME'];
-    var profileDirectory = Platform.environment['USERPROFILE'];
-    var directory = homeDirectory ?? profileDirectory;
-    var path = directory ?? currentDirectory.path;
-    var file = File('$path/${Config.name}');
-    var parts = [
-      '# Auto Commit CLI Configuration',
-      'apiKey: ${config.apiKey}',
-      'endpoint: ${config.endpoint}',
-      'model: ${config.model}',
-    ];
-    await file.writeAsString(parts.join('\n'));
-    stdout.writeln('\nConfiguration file created successfully\n');
   }
 
   void _setAPIKey(Config config) {
