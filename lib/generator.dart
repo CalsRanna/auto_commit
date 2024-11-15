@@ -21,23 +21,6 @@ class Generator {
         {'role': 'user', 'content': difference}
       ],
       'model': config.model,
-      'response_format': {
-        'type': 'json_schema',
-        'json_schema': {
-          'name': 'commit',
-          'schema': {
-            'type': 'object',
-            'strict': true,
-            'properties': {
-              'commit': {
-                'type': 'string',
-                'strict': true,
-                'description': 'commit message'
-              }
-            }
-          }
-        }
-      }
     };
     var response = await post(
       Uri.parse(url),
