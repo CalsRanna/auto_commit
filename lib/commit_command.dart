@@ -76,6 +76,7 @@ class CommitCommand extends Command {
 
   void _terminate() {
     _spinner.success();
+    _spinner.stop();
     stdout.writeln('\n\x1B[31m• Nothing to commit\x1B[0m');
   }
 }
