@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:auto_commit/config.dart';
 import 'package:http/http.dart';
+import 'package:openai_dart/openai_dart.dart';
 
 class Generator {
   static Future<String> generate(
     String difference, {
     required Config config,
   }) async {
+    var client = OpenAIClient(apiKey: config.apiKey, baseUrl: config.endpoint);
     var url = '${config.endpoint}/v1/chat/completions';
     var headers = {
       'Authorization': 'Bearer ${config.apiKey}',
@@ -15,37 +17,47 @@ class Generator {
     };
     var prompt = 'Generate a Conventional Commits style commit message for '
         'the following git diff. Only output the commit message, no other text.';
-    var schema = {
-      "description": 'Conventional commit message',
-      'name': 'commit',
-      'strict': true,
-      'schema': {
-        'type': 'object',
-        'properties': {
-          'commit': {
-            'description': 'commit message',
-            'type': 'string',
-          }
-        }
-      }
-    };
-    var body = {
-      'messages': [
-        {'role': 'system', 'content': prompt},
-        {'role': 'user', 'content': difference}
-      ],
-      'model': config.model,
-      'response_format': {'type': 'json_schema', 'json_schema': schema}
-    };
-    var response = await post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode(body),
+    var systemMessage = ChatCompletionMessage.system(content: prompt);
+    var userMessage = ChatCompletionMessage.user(
+      content: ChatCompletionUserMessageContent.string(difference),
     );
-    var json = jsonDecode(response.body);
-    var code = response.statusCode;
-    if (code == 200) return _getContent(json);
-    throw _getException(json);
+    var request = CreateChatCompletionRequest(
+      model: ChatCompletionModel.modelId(config.model),
+      messages: [systemMessage, userMessage],
+    );
+    var response = await client.createChatCompletion(request: request);
+    return response.choices.first.message.content ?? '';
+    // var schema = {
+    //   "description": 'Conventional commit message',
+    //   'name': 'commit',
+    //   'strict': true,
+    //   'schema': {
+    //     'type': 'object',
+    //     'properties': {
+    //       'commit': {
+    //         'description': 'commit message',
+    //         'type': 'string',
+    //       }
+    //     }
+    //   }
+    // };
+    // var body = {
+    //   'messages': [
+    //     {'role': 'system', 'content': prompt},
+    //     {'role': 'user', 'content': difference}
+    //   ],
+    //   'model': config.model,
+    //   'response_format': {'type': 'json_schema', 'json_schema': schema}
+    // };
+    // var response = await post(
+    //   Uri.parse(url),
+    //   headers: headers,
+    //   body: jsonEncode(body),
+    // );
+    // var json = jsonDecode(response.body);
+    // var code = response.statusCode;
+    // if (code == 200) return _getContent(json);
+    // throw _getException(json);
   }
 
   static String _getContent(Map<String, dynamic> json) {
