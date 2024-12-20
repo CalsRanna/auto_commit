@@ -38,7 +38,7 @@ class CommitCommand extends Command {
       _spinner.success();
       _spinner.stop();
       stdout.writeln('\n∙ ───────────────────────────────────────── ∙');
-      stdout.writeln('\tGenerated Commit Message\t');
+      stdout.writeln('∙ ${_getGeneratedTip()} ∙');
       stdout.writeln('∙ ───────────────────────────────────────── ∙\n');
       stdout.writeln('\x1B[32m$message\x1B[0m');
       if (argResults?['yes'] == true) return _commit(message);
@@ -72,5 +72,14 @@ class CommitCommand extends Command {
     _spinner.fail();
     _spinner.stop();
     stdout.writeln('\n\x1B[31m• $message\x1B[0m');
+  }
+
+  String _getGeneratedTip() {
+    final tip = 'Generated Commit Message';
+    final totalWidth = 41; // Width of - characters
+    final leadingPadding = (totalWidth - tip.length) ~/ 2;
+    var leadingPaddingCharacters = ' ' * leadingPadding;
+    var trailingPaddingCharacters = ' ' * (totalWidth - leadingPadding);
+    return '$leadingPaddingCharacters$tip$trailingPaddingCharacters';
   }
 }
