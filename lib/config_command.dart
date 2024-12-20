@@ -7,7 +7,7 @@ class ConfigCommand extends Command {
   ConfigCommand() {
     argParser
       ..addOption('set-api-key', help: 'Set the API key')
-      ..addOption('set-endpoint', help: 'Set the API endpoint')
+      ..addOption('set-base-url', help: 'Set the API base url')
       ..addOption('set-model', help: 'Set the model')
       ..addFlag('show', help: 'Show current configuration');
   }
@@ -22,7 +22,7 @@ class ConfigCommand extends Command {
   Future<void> run() async {
     var config = await Config.load();
     if (argResults?['set-api-key'] != null) return _setAPIKey(config);
-    if (argResults?['set-endpoint'] != null) return _setEndpoint(config);
+    if (argResults?['set-base-url'] != null) return _setBaseUrl(config);
     if (argResults?['set-model'] != null) return _setModel(config);
     if (argResults?['show'] == true) return _show(config);
   }
@@ -30,14 +30,14 @@ class ConfigCommand extends Command {
   void _setAPIKey(Config config) {
     config.apiKey = argResults!['set-api-key'].toString();
     config.save();
-    stdout.writeln('\nAPI Key set successfully');
+    stdout.writeln('\nAPI key set successfully');
     _show(config);
   }
 
-  void _setEndpoint(Config config) {
-    config.endpoint = argResults!['set-endpoint'].toString();
+  void _setBaseUrl(Config config) {
+    config.baseUrl = argResults!['set-base-url'].toString();
     config.save();
-    stdout.writeln('\nAPI Endpoint set successfully');
+    stdout.writeln('\nBase url set successfully');
     _show(config);
   }
 
@@ -59,7 +59,7 @@ class ConfigCommand extends Command {
       apiKey = prefix + encrypted.join() + suffix;
     }
     stdout.writeln('API Key: $apiKey');
-    stdout.writeln('Endpoint: ${config.endpoint}');
+    stdout.writeln('Base URL: ${config.baseUrl}');
     stdout.writeln('Model: ${config.model}\n');
   }
 }

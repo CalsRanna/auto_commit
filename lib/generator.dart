@@ -6,7 +6,7 @@ class Generator {
     String difference, {
     required Config config,
   }) async {
-    var client = OpenAIClient(apiKey: config.apiKey, baseUrl: config.endpoint);
+    var client = OpenAIClient(apiKey: config.apiKey, baseUrl: config.baseUrl);
     var prompt = 'Generate a Conventional Commits style commit message for '
         'the following git diff. Only output the commit message, no other text.';
     var systemMessage = ChatCompletionMessage.system(content: prompt);

@@ -6,12 +6,12 @@ class Config {
   static const String name = '.auto_commit.yaml';
 
   late String apiKey;
-  late String endpoint;
+  late String baseUrl;
   late String model;
 
   Config({
     this.apiKey = 'YOUR_API_KEY',
-    this.endpoint = 'https://api.openai.com',
+    this.baseUrl = 'https://api.openai.com',
     this.model = 'gpt-4o',
   });
 
@@ -24,8 +24,8 @@ class Config {
     var file = File('$path/$name');
     var parts = [
       '# Auto Commit CLI Configuration',
-      'apiKey: $apiKey',
-      'endpoint: $endpoint',
+      'api_key: $apiKey',
+      'base_url: $baseUrl',
       'model: $model',
     ];
     await file.writeAsString(parts.join('\n'));
@@ -37,8 +37,8 @@ class Config {
     var content = await file.readAsString();
     var yaml = loadYaml(content);
     return Config(
-      apiKey: yaml['apiKey']?.toString() ?? 'YOUR_API_KEY',
-      endpoint: yaml['endpoint']?.toString() ?? 'https://api.openai.com',
+      apiKey: yaml['api_key']?.toString() ?? '',
+      baseUrl: yaml['base_url']?.toString() ?? 'https://api.openai.com/v1',
       model: yaml['model']?.toString() ?? 'gpt-4o',
     );
   }

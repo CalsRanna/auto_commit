@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:auto_commit/config.dart';
 import 'package:cli_spin/cli_spin.dart';
-import 'package:http/http.dart';
+import 'package:openai_dart/openai_dart.dart';
 
 class DoctorCommand extends Command {
   final List<String> _errors = [];
@@ -21,7 +20,7 @@ class DoctorCommand extends Command {
     _spinner.start();
     var config = await Config.load();
     _checkAPIKey(config);
-    _checkEndpoint(config);
+    _checkBaseUrl(config);
     _checkModel(config);
     await _checkNetwork(config);
     _spinner.stop();
@@ -36,7 +35,7 @@ class DoctorCommand extends Command {
 
   void _checkAPIKey(Config config) {
     var apiKey = config.apiKey;
-    if (apiKey.isEmpty) return _fail('API Key not set');
+    if (apiKey.isEmpty) return _fail('API key not set');
     var length = apiKey.length;
     if (length > 13) {
       var prefix = apiKey.substring(0, 7);
@@ -44,13 +43,13 @@ class DoctorCommand extends Command {
       var encrypted = List.generate(length - 13, (index) => '*');
       apiKey = prefix + encrypted.join() + suffix;
     }
-    _spinner.success('API Key: $apiKey');
+    _spinner.success('API key: $apiKey');
     _spinner.start();
   }
 
-  void _checkEndpoint(Config config) {
-    if (config.endpoint.isEmpty) return _fail('Endpoint not set');
-    _spinner.success('Endpoint: ${config.endpoint}');
+  void _checkBaseUrl(Config config) {
+    if (config.baseUrl.isEmpty) return _fail('Base url not set');
+    _spinner.success('Base url: ${config.baseUrl}');
     _spinner.start();
   }
 
@@ -62,33 +61,24 @@ class DoctorCommand extends Command {
 
   Future<void> _checkNetwork(Config config) async {
     _spinner.text = '';
-    var response = await _connect(config);
-    if (response.statusCode != 200) {
-      var json = jsonDecode(response.body);
-      var error = json['error']['message'];
-      _fail('Network connectivity failed', error: error);
-      return;
+    try {
+      await _connect(config);
+      _spinner.success('Network connectivity');
+    } catch (error) {
+      _fail('Network connectivity failed', error: error.toString());
     }
-    _spinner.success('Network connectivity');
   }
 
-  Future<Response> _connect(Config config) async {
-    var url = '${config.endpoint}/v1/chat/completions';
-    var headers = {
-      'Authorization': 'Bearer ${config.apiKey}',
-      'Content-Type': 'application/json'
-    };
-    var body = {
-      'messages': [
-        {'role': 'user', 'content': 'hi'}
-      ],
-      'model': config.model,
-    };
-    return await post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode(body),
+  Future<CreateChatCompletionResponse> _connect(Config config) async {
+    var client = OpenAIClient(apiKey: config.apiKey, baseUrl: config.baseUrl);
+    var userMessage = ChatCompletionMessage.user(
+      content: ChatCompletionUserMessageContent.string('hi'),
     );
+    var request = CreateChatCompletionRequest(
+      model: ChatCompletionModel.modelId(config.model),
+      messages: [userMessage],
+    );
+    return await client.createChatCompletion(request: request);
   }
 
   void _fail(String message, {String? error}) {
