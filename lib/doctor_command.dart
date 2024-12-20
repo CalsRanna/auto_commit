@@ -78,7 +78,11 @@ class DoctorCommand extends Command {
       model: ChatCompletionModel.modelId(config.model),
       messages: [userMessage],
     );
-    return await client.createChatCompletion(request: request);
+    try {
+      return await client.createChatCompletion(request: request);
+    } finally {
+      client.endSession();
+    }
   }
 
   void _fail(String message, {String? error}) {

@@ -17,7 +17,11 @@ class Generator {
       model: ChatCompletionModel.modelId(config.model),
       messages: [systemMessage, userMessage],
     );
-    var response = await client.createChatCompletion(request: request);
-    return response.choices.first.message.content ?? '';
+    try {
+      var response = await client.createChatCompletion(request: request);
+      return response.choices.first.message.content ?? '';
+    } finally {
+      client.endSession();
+    }
   }
 }
