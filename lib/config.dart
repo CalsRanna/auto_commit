@@ -10,8 +10,8 @@ class Config {
   late String model;
 
   Config({
-    this.apiKey = 'YOUR_API_KEY',
-    this.baseUrl = 'https://api.openai.com',
+    this.apiKey = '',
+    this.baseUrl = 'https://api.openai.com/v1',
     this.model = 'gpt-4o',
   });
 
