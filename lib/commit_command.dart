@@ -46,8 +46,6 @@ class CommitCommand extends Command {
       var answer = stdin.readLineSync();
       if (answer == 'y') return _commit(message);
       stdout.writeln('\n⭕ Commit cancelled.');
-    } on GeneratorException catch (error) {
-      _fail('[${error.code}] ${error.message}');
     } catch (error) {
       _fail('$error');
     }
