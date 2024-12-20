@@ -24,7 +24,7 @@ class ConfigCommand extends Command {
     if (argResults?['set-api-key'] != null) return _setAPIKey(config);
     if (argResults?['set-base-url'] != null) return _setBaseUrl(config);
     if (argResults?['set-model'] != null) return _setModel(config);
-    if (argResults?['show'] == true) return _show(config);
+    return _show(config);
   }
 
   void _setAPIKey(Config config) {
