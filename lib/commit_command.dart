@@ -42,8 +42,8 @@ class CommitCommand extends Command {
       stdout.writeln('∙ ───────────────────────────────────────── ∙\n');
       stdout.writeln('\x1B[32m$message\x1B[0m');
       if (argResults?['yes'] == true) return _commit(message);
-      stdout.write('\n⟩ Do you want to use this message? [y/n] ');
-      var answer = stdin.readLineSync();
+      stdout.write('\n⟩ Do you want to use this message? [Y/N]');
+      var answer = _readCharSync();
       if (answer == 'y') return _commit(message);
       stdout.writeln('\n⭕ Commit cancelled.');
     } catch (error) {
@@ -81,5 +81,16 @@ class CommitCommand extends Command {
     var leadingPaddingCharacters = ' ' * leadingPadding;
     var trailingPaddingCharacters = ' ' * (totalWidth - leadingPadding);
     return '$leadingPaddingCharacters$tip$trailingPaddingCharacters';
+  }
+
+  String _readCharSync() {
+    stdin.echoMode = false;
+    stdin.lineMode = false;
+    int byte = stdin.readByteSync();
+    stdin.echoMode = true;
+    stdin.lineMode = true;
+    var char = String.fromCharCode(byte).toLowerCase();
+    stdout.writeln();
+    return char;
   }
 }
