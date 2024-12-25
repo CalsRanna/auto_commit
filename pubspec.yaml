@@ -6,6 +6,9 @@ version: 1.0.3+29
 environment:
   sdk: ^3.5.4
 
+executables:
+  flit: auto_commit
+
 # Add regular dependencies here.
 dependencies:
   # path: ^1.8.0

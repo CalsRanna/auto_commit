@@ -2,6 +2,30 @@
 
 An AI-powered Conventional Commits message generator for Git. This tool analyzes your staged changes and generates standardized commit messages using OpenAI's GPT models.
 
+## Installation
+
+There are two ways to install Auto Commit CLI:
+
+### Using Homebrew (Recommended)
+
+```bash
+# Add the tap repository
+brew tap calsranna/inspire
+
+# Install the CLI
+brew install calsranna/inspire/flit
+```
+
+### Using Dart (Requires Dart SDK)
+
+If you have Dart SDK installed, you can install via pub:
+
+```bash
+dart pub global activate auto_commit
+```
+
+After installation, the command will be available as `flit` in your terminal.
+
 ## Features
 
 ### 🤖 AI-Powered Commit Messages
@@ -42,7 +66,7 @@ flit commit -y  # Skip confirmation
 flit config --set-api-key "your-api-key"
 flit config --set-endpoint "https://api.openai.com"
 flit config --set-model "gpt-4"
-flit config --show    # Display current configuration
+flit config [--show]    # Display current configuration
 flit config --init    # Create new configuration file
 
 # Check system status
@@ -81,30 +105,6 @@ View current configuration (with masked API key):
 ```bash
 flit config --show
 ```
-
-## Project Structure
-
-```
-lib/
-  ├─ auto_commit.dart      # Main CLI entry point
-  ├─ commit_command.dart   # Commit message generation
-  ├─ config_command.dart   # Configuration management
-  ├─ config.dart          # Configuration handling
-  ├─ doctor_command.dart   # System health checks
-  ├─ generator.dart        # AI interaction logic
-  ├─ spinner.dart         # CLI loading animations
-  └─ version_command.dart  # Version information (v1.0.0)
-```
-
-## Dependencies
-
-- `args`: Command line argument parsing
-- `http`: API communication
-- `process_run`: Git command execution
-- `yaml`: Configuration file parsing
-- Other Dart standard libraries
-
-## Technical Details
 
 ### Configuration System
 
