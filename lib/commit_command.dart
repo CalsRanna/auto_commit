@@ -31,24 +31,30 @@ class CommitCommand extends Command {
     var difference = await _differentiate();
     if (difference.isEmpty) return _fail('Nothing to commit');
     _spinner.success();
-    _spinner.start('Generating commit message');
+
     var config = await Config.load();
     try {
-      var message = await Generator.generate(difference, config: config);
-      _spinner.success();
-      _spinner.stop();
-      stdout.writeln('\n∙ ───────────────────────────────────────── ∙');
-      stdout.writeln('∙ ${_getGeneratedTip()} ∙');
-      stdout.writeln('∙ ───────────────────────────────────────── ∙\n');
-      stdout.writeln('\x1B[32m$message\x1B[0m');
+      var message = await _generateMessage(difference, config);
       if (argResults?['yes'] == true) return _commit(message);
-      stdout.write('\n⟩ Do you want to use this message? [Y/N]');
-      var answer = _readCharSync();
-      if (answer == 'y') return _commit(message);
-      stdout.writeln('\n⭕ Commit cancelled.');
+      while (true) {
+        _displayMessage(message);
+        switch (await _promptForAction()) {
+          case 'Y':
+            return _commit(message);
+          case 'N':
+            return _cancel();
+          default:
+            message = await _generateMessage(difference, config);
+            continue;
+        }
+      }
     } catch (error) {
       _fail('$error');
     }
+  }
+
+  void _cancel() {
+    stdout.writeln('⭕ Commit cancelled.');
   }
 
   Future<void> _commit(String message) async {
@@ -57,7 +63,7 @@ class CommitCommand extends Command {
     var shell = Shell(verbose: false);
     await shell.run('git commit -F .commit');
     await file.delete();
-    stdout.writeln('\n✨ Commit completed');
+    stdout.writeln('✨ Commit completed');
   }
 
   Future<String> _differentiate() async {
@@ -68,10 +74,25 @@ class CommitCommand extends Command {
     return difference;
   }
 
+  void _displayMessage(String message) {
+    stdout.writeln('\n∙ ───────────────────────────────────────── ∙');
+    stdout.writeln('∙ ${_getGeneratedTip()} ∙');
+    stdout.writeln('∙ ───────────────────────────────────────── ∙\n');
+    stdout.writeln('\x1B[32m$message\x1B[0m');
+  }
+
   void _fail(String message) {
     _spinner.fail();
     _spinner.stop();
     stdout.writeln('\n\x1B[31m• $message\x1B[0m');
+  }
+
+  Future<String> _generateMessage(String difference, Config config) async {
+    _spinner.start('Generating commit message');
+    var message = await Generator.generate(difference, config: config);
+    _spinner.success();
+    _spinner.stop();
+    return message;
   }
 
   String _getGeneratedTip() {
@@ -83,14 +104,16 @@ class CommitCommand extends Command {
     return '$leadingPaddingCharacters$tip$trailingPaddingCharacters';
   }
 
-  String _readCharSync() {
+  Future<String> _promptForAction() async {
+    stdout.write(
+        '\n⟩ Press Y to commit, N to cancel, any other key to try another: ');
     stdin.echoMode = false;
     stdin.lineMode = false;
     int byte = stdin.readByteSync();
     stdin.echoMode = true;
     stdin.lineMode = true;
-    var char = String.fromCharCode(byte).toLowerCase();
-    stdout.writeln();
+    var char = String.fromCharCode(byte).toUpperCase();
+    stdout.writeln('$char\n');
     return char;
   }
 }
