@@ -105,8 +105,8 @@ class CommitCommand extends Command {
   }
 
   Future<String> _promptForAction() async {
-    stdout.write(
-        '\n⟩ Press Y to commit, N to cancel, any other key to try another: ');
+    var prompt = 'Press Y to commit, N to cancel, any other key to try another';
+    stdout.write('\n⟩ $prompt: ');
     stdin.echoMode = false;
     stdin.lineMode = false;
     int byte = stdin.readByteSync();
