@@ -16,16 +16,6 @@ brew tap calsranna/inspire
 brew install calsranna/inspire/flit
 ```
 
-### Using Dart (Requires Dart SDK)
-
-If you have Dart SDK installed, you can install via pub:
-
-```bash
-dart pub global activate auto_commit
-```
-
-After installation, the command will be available as `flit` in your terminal.
-
 ## Features
 
 ### 🤖 AI-Powered Commit Messages
@@ -64,7 +54,7 @@ flit commit -y  # Skip confirmation
 
 # Configure settings
 flit config --set-api-key "your-api-key"
-flit config --set-endpoint "https://api.openai.com"
+flit config --set-base-url "https://api.openai.com"
 flit config --set-model "gpt-4"
 flit config [--show]    # Display current configuration
 flit config --init    # Create new configuration file
@@ -83,8 +73,8 @@ The tool supports both local (project-specific) and global configuration files:
 
 ```yaml
 # .auto_commit.yaml
-apiKey: your-api-key
-endpoint: https://api.openai.com # Default OpenAI endpoint
+api_key: your-api-key
+base_url: https://api.openai.com # Default OpenAI endpoint
 model: gpt-4o # Default model
 ```
 
