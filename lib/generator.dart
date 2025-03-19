@@ -8,7 +8,15 @@ class Generator {
     String difference, {
     required Config config,
   }) async {
-    var client = OpenAIClient(apiKey: config.apiKey, baseUrl: config.baseUrl);
+    var headers = {
+      'HTTP-Referer': 'https://github.com/CalsRanna/auto_commit',
+      'X-Title': 'Flit',
+    };
+    var client = OpenAIClient(
+      apiKey: config.apiKey,
+      baseUrl: config.baseUrl,
+      headers: headers,
+    );
     var prompt = 'Generate a Conventional Commits style commit message for '
         'the following git diff. Only output the commit message, no other text.';
     var systemMessage = ChatCompletionMessage.system(content: prompt);

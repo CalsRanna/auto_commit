@@ -70,7 +70,15 @@ class DoctorCommand extends Command {
   }
 
   Future<CreateChatCompletionResponse> _connect(Config config) async {
-    var client = OpenAIClient(apiKey: config.apiKey, baseUrl: config.baseUrl);
+    var headers = {
+      'HTTP-Referer': 'https://github.com/CalsRanna/auto_commit',
+      'X-Title': 'Flit',
+    };
+    var client = OpenAIClient(
+      apiKey: config.apiKey,
+      baseUrl: config.baseUrl,
+      headers: headers,
+    );
     var userMessage = ChatCompletionMessage.user(
       content: ChatCompletionUserMessageContent.string('hi'),
     );
