@@ -67,6 +67,8 @@ class CommitCommand extends Command {
     await file.delete();
     var hash = await _getShortHash();
     stdout.writeln('✨ Commit completed ($hash)');
+    stdout.writeln(
+        '\n💡 Tip: Run \'git push\' to share your changes with the remote repository');
   }
 
   Future<String> _differentiate() async {
