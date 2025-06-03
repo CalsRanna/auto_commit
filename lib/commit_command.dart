@@ -28,9 +28,11 @@ class CommitCommand extends Command {
   Future<void> run() async {
     stdout.writeln('\n✧ ────────────── AUTO COMMIT ────────────── ✧\n');
     _spinner.start('Analyzing changes');
+    var stat = await _getDifferentStat();
+    _spinner.success();
+    stdout.writeln(stat);
     var difference = await _differentiate();
     if (difference.isEmpty) return _fail('Nothing to commit');
-    _spinner.success();
 
     var config = await Config.load();
     try {
@@ -93,6 +95,25 @@ class CommitCommand extends Command {
     _spinner.success();
     _spinner.stop();
     return message;
+  }
+
+  Future<String> _getDifferentStat() async {
+    var buffer = StringBuffer();
+    buffer.write('\n');
+    var shell = Shell(verbose: false);
+    var result = await shell.run('git diff --staged --numstat');
+    var stat = result.first.stdout.toString();
+    var lines = stat.split('\n');
+    for (var line in lines) {
+      if (line.trim().isEmpty) continue;
+      var parts = line.split('\t');
+      if (parts.length < 3) continue;
+      var changes =
+          '  ${parts[2]} \t \x1B[32m+${parts[0]}\x1B[0m \x1B[31m-${parts[1]}\x1B[0m';
+      buffer.write('$changes\n');
+    }
+    await Future.delayed(const Duration(milliseconds: 500));
+    return buffer.toString();
   }
 
   String _getGeneratedTip() {
