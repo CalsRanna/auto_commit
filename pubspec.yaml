@@ -1,6 +1,6 @@
 name: auto_commit
 description: A sample command-line application.
-version: 1.0.4+33
+version: 1.0.5+35
 # repository: https://github.com/my_org/my_repo
 
 environment:
