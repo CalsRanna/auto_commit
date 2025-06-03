@@ -65,7 +65,8 @@ class CommitCommand extends Command {
     var shell = Shell(verbose: false);
     await shell.run('git commit -F .commit');
     await file.delete();
-    stdout.writeln('✨ Commit completed');
+    var hash = await _getShortHash();
+    stdout.writeln('✨ Commit completed ($hash)');
   }
 
   Future<String> _differentiate() async {
@@ -124,6 +125,12 @@ class CommitCommand extends Command {
     var trailingPaddingCharacters =
         ' ' * (totalWidth - tip.length - leadingPadding);
     return '$leadingPaddingCharacters$tip$trailingPaddingCharacters';
+  }
+
+  Future<String> _getShortHash() async {
+    var shell = Shell(verbose: false);
+    var result = await shell.run('git rev-parse --short HEAD');
+    return result.first.stdout.toString().trim();
   }
 
   Future<String> _promptForAction() async {
