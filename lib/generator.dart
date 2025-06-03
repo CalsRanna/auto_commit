@@ -88,7 +88,7 @@ Please generate the commit message and the git diff is below:
       buffer.write(description);
       if (body != null) buffer.write('\n\n$body');
       if (footer != null) buffer.write('\n\n$footer');
-      return buffer.toString();
+      return buffer.toString().trim();
     } catch (error) {
       return content;
     }
