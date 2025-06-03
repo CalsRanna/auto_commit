@@ -134,7 +134,7 @@ class CommitCommand extends Command {
 
   Future<int> _getLocalCommitsLength() async {
     var shell = Shell(verbose: false);
-    var result = await shell.run('git rev-list --count HEAD..origin');
+    var result = await shell.run('git rev-list --count @{u}...HEAD');
     return int.parse(result.first.stdout.toString());
   }
 
