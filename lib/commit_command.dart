@@ -67,8 +67,11 @@ class CommitCommand extends Command {
     await file.delete();
     var hash = await _getShortHash();
     stdout.writeln('✨ Commit completed ($hash)');
-    stdout.writeln(
-        '\n💡 Tip: Run \'git push\' to share your changes with the remote repository');
+    var count = await _getLocalCommitsLength();
+    if (count > 3) {
+      stdout.writeln(
+          '\n💡 Tip: Run \'git push\' to share your changes with the remote repository');
+    }
   }
 
   Future<String> _differentiate() async {
@@ -127,6 +130,12 @@ class CommitCommand extends Command {
     var trailingPaddingCharacters =
         ' ' * (totalWidth - tip.length - leadingPadding);
     return '$leadingPaddingCharacters$tip$trailingPaddingCharacters';
+  }
+
+  Future<int> _getLocalCommitsLength() async {
+    var shell = Shell(verbose: false);
+    var result = await shell.run('git rev-list --count HEAD..origin');
+    return int.parse(result.first.stdout.toString());
   }
 
   Future<String> _getShortHash() async {
