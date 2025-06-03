@@ -121,7 +121,8 @@ class CommitCommand extends Command {
     final totalWidth = 41; // Width of - characters
     final leadingPadding = (totalWidth - tip.length) ~/ 2;
     var leadingPaddingCharacters = ' ' * leadingPadding;
-    var trailingPaddingCharacters = ' ' * (totalWidth - leadingPadding);
+    var trailingPaddingCharacters =
+        ' ' * (totalWidth - tip.length - leadingPadding);
     return '$leadingPaddingCharacters$tip$trailingPaddingCharacters';
   }
 
