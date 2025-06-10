@@ -39,7 +39,7 @@ class CommitCommand extends Command {
       var message = await _generateMessage(difference, config);
       if (argResults?['yes'] == true) return _commit(message);
       while (true) {
-        _displayMessage(message);
+        stdout.writeln('\n\x1B[32m$message\x1B[0m');
         switch (await _promptForAction()) {
           case 'Y':
             return _commit(message);
@@ -82,13 +82,6 @@ class CommitCommand extends Command {
     return difference;
   }
 
-  void _displayMessage(String message) {
-    stdout.writeln('\n∙ ───────────────────────────────────────── ∙');
-    stdout.writeln('∙ ${_getGeneratedTip()} ∙');
-    stdout.writeln('∙ ───────────────────────────────────────── ∙\n');
-    stdout.writeln('\x1B[32m$message\x1B[0m');
-  }
-
   void _fail(String message) {
     _spinner.fail();
     _spinner.stop();
@@ -115,21 +108,11 @@ class CommitCommand extends Command {
       var parts = line.split('\t');
       if (parts.length < 3) continue;
       var changes =
-          '  ${parts[2]} \t \x1B[32m+${parts[0]}\x1B[0m \x1B[31m-${parts[1]}\x1B[0m';
+          '\x1B[32m${parts[2]}\x1B[0m \x1B[32m+${parts[0]}\x1B[0m \x1B[31m-${parts[1]}\x1B[0m';
       buffer.write('$changes\n');
     }
     await Future.delayed(const Duration(milliseconds: 500));
     return buffer.toString();
-  }
-
-  String _getGeneratedTip() {
-    final tip = 'Generated Commit Message';
-    final totalWidth = 41; // Width of - characters
-    final leadingPadding = (totalWidth - tip.length) ~/ 2;
-    var leadingPaddingCharacters = ' ' * leadingPadding;
-    var trailingPaddingCharacters =
-        ' ' * (totalWidth - tip.length - leadingPadding);
-    return '$leadingPaddingCharacters$tip$trailingPaddingCharacters';
   }
 
   Future<int> _getLocalCommitsLength() async {
