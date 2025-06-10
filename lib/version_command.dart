@@ -12,6 +12,6 @@ class VersionCommand extends Command {
 
   @override
   Future<void> run() async {
-    print('Flit 1.0.7+45');
+    print('Flit 1.0.8+49');
   }
 }
