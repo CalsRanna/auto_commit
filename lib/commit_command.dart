@@ -130,13 +130,27 @@ class CommitCommand extends Command {
   Future<String> _promptForAction() async {
     var prompt = 'Press Y to commit, N to cancel, any other key to try another';
     stdout.write('\n⟩ $prompt: ');
-    stdin.echoMode = false;
-    stdin.lineMode = false;
-    int byte = stdin.readByteSync();
-    stdin.echoMode = true;
-    stdin.lineMode = true;
-    var char = String.fromCharCode(byte).toUpperCase();
-    stdout.writeln('$char\n');
-    return char;
+    
+    // Handle Windows console input properly
+    try {
+      stdin.echoMode = false;
+      stdin.lineMode = false;
+      int byte = stdin.readByteSync();
+      var char = String.fromCharCode(byte).toUpperCase();
+      stdout.writeln('$char\n');
+      return char;
+    } catch (e) {
+      // Fallback for Windows console issues
+      var input = stdin.readLineSync();
+      return (input?.isNotEmpty == true) ? input![0].toUpperCase() : '';
+    } finally {
+      // Always restore console state
+      try {
+        stdin.echoMode = true;
+        stdin.lineMode = true;
+      } catch (_) {
+        // Ignore restoration errors
+      }
+    }
   }
 }
