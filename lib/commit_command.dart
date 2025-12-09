@@ -117,8 +117,19 @@ class CommitCommand extends Command {
 
   Future<int> _getLocalCommitsLength() async {
     var shell = Shell(verbose: false);
-    var result = await shell.run('git rev-list --count @{u}...HEAD');
-    return int.parse(result.first.stdout.toString());
+    try {
+      var result = await shell.run('git rev-list --count @{u}...HEAD');
+      return int.parse(result.first.stdout.toString());
+    } catch (e) {
+      // If upstream branch is not set, try counting commits from the beginning
+      try {
+        var result = await shell.run('git rev-list --count HEAD');
+        return int.parse(result.first.stdout.toString());
+      } catch (e) {
+        // If all else fails, return a safe default
+        return 0;
+      }
+    }
   }
 
   Future<String> _getShortHash() async {
