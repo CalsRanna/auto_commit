@@ -67,6 +67,13 @@ class CommitCommand extends Command {
     await file.delete();
     var hash = await _getShortHash();
     stdout.writeln('✨ Commit completed ($hash)');
+    var branch = await _getCurrentBranch();
+    if (branch != null && !await _hasUpstreamBranch(branch)) {
+      stdout.writeln(
+        "\n💡 Tip: Run 'git push -u origin $branch' to publish and track this branch",
+      );
+      return;
+    }
     var count = await _getLocalCommitsLength();
     if (count > 3) {
       stdout.writeln(
@@ -132,6 +139,29 @@ class CommitCommand extends Command {
     }
   }
 
+  Future<String?> _getCurrentBranch() async {
+    var shell = Shell(verbose: false);
+    try {
+      var result = await shell.run('git branch --show-current');
+      var branch = result.first.stdout.toString().trim();
+      return branch.isEmpty ? null : branch;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<bool> _hasUpstreamBranch(String branch) async {
+    var shell = Shell(verbose: false);
+    try {
+      var result = await shell.run(
+        'git for-each-ref --format="%(upstream:short)" refs/heads/$branch',
+      );
+      return result.first.stdout.toString().trim().isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<String> _getShortHash() async {
     var shell = Shell(verbose: false);
     var result = await shell.run('git rev-parse --short HEAD');
@@ -141,7 +171,7 @@ class CommitCommand extends Command {
   Future<String> _promptForAction() async {
     var prompt = 'Press Y to commit, N to cancel, any other key to try another';
     stdout.write('\n⟩ $prompt: ');
-    
+
     // Handle Windows console input properly
     try {
       stdin.echoMode = false;
