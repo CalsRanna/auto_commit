@@ -1,0 +1,13 @@
+# Tapster Configuration File
+# This file defines how your package should be built and published
+
+name: flit
+version: 1.0.11
+description: AI-powered Conventional Commits Generator
+homepage: https://github.com/CalsRanna/auto_commit
+repository: https://github.com/CalsRanna/auto_commit
+license: MIT
+
+tap: inspire
+asset: build/flit
+checksum: 1df71097814268cefa73f04c514695f22a25783c14deb6e1ce2d3709140a25c7
