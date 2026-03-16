@@ -61,6 +61,7 @@ flit config --init    # Create new configuration file
 
 # Check system status
 flit doctor
+flit doctor -v  # Show detailed diagnostic information
 
 # Display version
 flit --version
