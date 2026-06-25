@@ -7,6 +7,8 @@ import 'package:cli_spin/cli_spin.dart';
 import 'package:process_run/process_run.dart';
 
 class CommitCommand extends Command {
+  static const _maxDiffChars = 12000;
+
   final _spinner = CliSpin(spinner: CliSpinners.dots5);
 
   CommitCommand() {
@@ -33,6 +35,7 @@ class CommitCommand extends Command {
     stdout.writeln(stat);
     var difference = await _differentiate();
     if (difference.isEmpty) return _fail('Nothing to commit');
+    difference = _truncateDiff(difference);
 
     var config = await Config.load();
     try {
@@ -103,6 +106,17 @@ class CommitCommand extends Command {
     return message;
   }
 
+  Future<String?> _getCurrentBranch() async {
+    var shell = Shell(verbose: false);
+    try {
+      var result = await shell.run('git branch --show-current');
+      var branch = result.first.stdout.toString().trim();
+      return branch.isEmpty ? null : branch;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<String> _getDifferentStat() async {
     var buffer = StringBuffer();
     buffer.write('\n');
@@ -139,15 +153,10 @@ class CommitCommand extends Command {
     }
   }
 
-  Future<String?> _getCurrentBranch() async {
+  Future<String> _getShortHash() async {
     var shell = Shell(verbose: false);
-    try {
-      var result = await shell.run('git branch --show-current');
-      var branch = result.first.stdout.toString().trim();
-      return branch.isEmpty ? null : branch;
-    } catch (_) {
-      return null;
-    }
+    var result = await shell.run('git rev-parse --short HEAD');
+    return result.first.stdout.toString().trim();
   }
 
   Future<bool> _hasUpstreamBranch(String branch) async {
@@ -160,12 +169,6 @@ class CommitCommand extends Command {
     } catch (_) {
       return false;
     }
-  }
-
-  Future<String> _getShortHash() async {
-    var shell = Shell(verbose: false);
-    var result = await shell.run('git rev-parse --short HEAD');
-    return result.first.stdout.toString().trim();
   }
 
   Future<String> _promptForAction() async {
@@ -193,5 +196,18 @@ class CommitCommand extends Command {
         // Ignore restoration errors
       }
     }
+  }
+
+  String _truncateDiff(String diff) {
+    if (diff.length <= _maxDiffChars) return diff;
+    var truncated = diff.substring(0, _maxDiffChars);
+    var lastNewline = truncated.lastIndexOf('\n');
+    if (lastNewline != -1) truncated = truncated.substring(0, lastNewline);
+    var omitted = diff.length - truncated.length;
+    stdout.writeln(
+      '\x1B[33m\n⚠ Diff too large ($omitted chars omitted). '
+      'Consider staging fewer files for better results.\x1B[0m',
+    );
+    return truncated;
   }
 }
