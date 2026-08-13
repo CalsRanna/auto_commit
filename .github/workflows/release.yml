@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # 先建空 Release，各平台 job 并行 upload asset
-      - run: gh release create "${{ github.ref_name }}" --generate-notes
+      # 先建空 Release，各平台 job 并行 upload asset（已存在则跳过，保证重跑幂等）
+      - run: gh release view "${{ github.ref_name }}" >/dev/null 2>&1 || gh release create "${{ github.ref_name }}" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
 
