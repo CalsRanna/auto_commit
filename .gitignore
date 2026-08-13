@@ -3,3 +3,6 @@
 .dart_tool/
 .DS_Store
 build/
+
+# tapster distribution output
+dist/
