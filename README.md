@@ -4,16 +4,33 @@ An AI-powered Conventional Commits message generator for Git. This tool analyzes
 
 ## Installation
 
-There are two ways to install Auto Commit CLI:
-
-### Using Homebrew (Recommended)
+### macOS (Homebrew)
 
 ```bash
 # Add the tap repository
-brew tap calsranna/inspire
+brew tap CalsRanna/tap
 
 # Install the CLI
-brew install calsranna/inspire/flit
+brew install flit
+```
+
+### Windows (Scoop)
+
+```powershell
+# Add the bucket repository
+scoop bucket add scoop-bucket https://github.com/CalsRanna/scoop-bucket
+
+# Install the CLI
+scoop install flit
+```
+
+### Build from Source
+
+```bash
+git clone https://github.com/CalsRanna/auto_commit.git
+cd auto_commit
+dart pub get
+./build.sh  # Outputs build/flit
 ```
 
 ## Features
