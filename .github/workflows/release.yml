@@ -48,7 +48,9 @@ jobs:
 
       - name: Compile
         shell: bash
-        run: dart compile exe bin/auto_commit.dart -o "build/${{ matrix.asset }}" -DAPP_VERSION="$VERSION"
+        run: |
+          mkdir -p build
+          dart compile exe bin/auto_commit.dart -o "build/${{ matrix.asset }}" -DAPP_VERSION="$VERSION"
 
       - name: Upload asset
         shell: bash
