@@ -25,6 +25,8 @@ Rules:
 - Include a concise body if the changes need explanation
 ''';
 
+  static const _maxAttempts = 3;
+
   static Future<String> generate(
     String difference, {
     required Config config,
@@ -42,17 +44,21 @@ Rules:
       model: ChatCompletionModel.modelId(config.model),
       messages: [systemMessage, userMessage],
       temperature: 0.2,
-      maxTokens: 500,
       responseFormat: ResponseFormat.jsonObject(),
     );
     try {
-      var response = await client.createChatCompletion(request: request);
-      var raw = response.choices.first.message.content ?? '';
-      var message = _parseMessage(raw);
-      if (message.isEmpty) {
-        throw Exception('AI returned an empty commit message');
+      var finishReason = '';
+      for (var attempt = 0; attempt < _maxAttempts; attempt++) {
+        var response = await client.createChatCompletion(request: request);
+        var choice = response.choices.first;
+        finishReason = choice.finishReason?.name ?? 'unknown';
+        var message = _parseMessage(choice.message.content ?? '');
+        if (message.isNotEmpty) return message;
       }
-      return message;
+      throw Exception(
+        'AI returned an empty commit message '
+        '($_maxAttempts attempts, last finish_reason: $finishReason)',
+      );
     } finally {
       client.endSession();
     }
