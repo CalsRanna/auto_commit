@@ -7,8 +7,6 @@ import 'package:cli_spin/cli_spin.dart';
 import 'package:process_run/process_run.dart';
 
 class CommitCommand extends Command {
-  static const _maxDiffChars = 12000;
-
   final _spinner = CliSpin(spinner: CliSpinners.dots5);
 
   CommitCommand() {
@@ -35,7 +33,6 @@ class CommitCommand extends Command {
     stdout.writeln(stat);
     var difference = await _differentiate();
     if (difference.isEmpty) return _fail('Nothing to commit');
-    difference = _truncateDiff(difference);
 
     var config = await Config.load();
     try {
@@ -198,16 +195,4 @@ class CommitCommand extends Command {
     }
   }
 
-  String _truncateDiff(String diff) {
-    if (diff.length <= _maxDiffChars) return diff;
-    var truncated = diff.substring(0, _maxDiffChars);
-    var lastNewline = truncated.lastIndexOf('\n');
-    if (lastNewline != -1) truncated = truncated.substring(0, lastNewline);
-    var omitted = diff.length - truncated.length;
-    stdout.writeln(
-      '\x1B[33m\n⚠ Diff too large ($omitted chars omitted). '
-      'Consider staging fewer files for better results.\x1B[0m',
-    );
-    return truncated;
-  }
 }
