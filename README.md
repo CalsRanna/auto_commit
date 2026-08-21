@@ -46,7 +46,7 @@ dart pub get
 ### ⚙️ Configuration Management
 
 - OpenAI API integration out of the box
-- Flexible API configuration (endpoint, key, model)
+- Flexible API configuration (endpoint, key, model, reasoning effort)
 - Secure API key storage with masked display
 - Configuration priority: local > global > defaults
 - Easy setup with `--init` flag
@@ -73,6 +73,7 @@ flit commit -y  # Skip confirmation
 flit config --set-api-key "your-api-key"
 flit config --set-base-url "https://api.openai.com"
 flit config --set-model "gpt-4"
+flit config --set-reasoning-effort "low"  # low, medium, high
 flit config [--show]    # Display current configuration
 flit config --init    # Create new configuration file
 
@@ -94,6 +95,7 @@ The tool supports both local (project-specific) and global configuration files:
 api_key: your-api-key
 base_url: https://api.openai.com # Default OpenAI endpoint
 model: gpt-4o # Default model
+reasoning_effort: low # Reasoning strength: low, medium, high (default: low)
 ```
 
 Configuration locations (in priority order):

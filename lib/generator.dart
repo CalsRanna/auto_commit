@@ -45,6 +45,7 @@ Rules:
       messages: [systemMessage, userMessage],
       temperature: 0.2,
       responseFormat: ResponseFormat.jsonObject(),
+      reasoningEffort: _toReasoningEffort(config.reasoningEffort),
     );
     try {
       var finishReason = '';
@@ -62,6 +63,13 @@ Rules:
     } finally {
       client.endSession();
     }
+  }
+
+  static ReasoningEffort? _toReasoningEffort(String value) {
+    for (final effort in ReasoningEffort.values) {
+      if (effort.name == value) return effort;
+    }
+    return null;
   }
 
   static String _cleanText(String raw) {

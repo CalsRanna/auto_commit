@@ -4,11 +4,17 @@ import 'package:args/command_runner.dart';
 import 'package:auto_commit/config.dart';
 
 class ConfigCommand extends Command {
+  static const _allowedReasoningEfforts = ['low', 'medium', 'high'];
+
   ConfigCommand() {
     argParser
       ..addOption('set-api-key', help: 'Set the API key')
       ..addOption('set-base-url', help: 'Set the API base url')
       ..addOption('set-model', help: 'Set the model')
+      ..addOption(
+        'set-reasoning-effort',
+        help: 'Set the reasoning effort (${_allowedReasoningEfforts.join(', ')})',
+      )
       ..addFlag('show', help: 'Show current configuration');
   }
 
@@ -24,6 +30,9 @@ class ConfigCommand extends Command {
     if (argResults?['set-api-key'] != null) return _setAPIKey(config);
     if (argResults?['set-base-url'] != null) return _setBaseUrl(config);
     if (argResults?['set-model'] != null) return _setModel(config);
+    if (argResults?['set-reasoning-effort'] != null) {
+      return _setReasoningEffort(config);
+    }
     return _show(config);
   }
 
@@ -48,6 +57,21 @@ class ConfigCommand extends Command {
     _show(config);
   }
 
+  void _setReasoningEffort(Config config) {
+    var value = argResults!['set-reasoning-effort'].toString().toLowerCase();
+    if (!_allowedReasoningEfforts.contains(value)) {
+      stdout.writeln(
+        '\nInvalid reasoning effort: $value '
+        '(allowed: ${_allowedReasoningEfforts.join(', ')})',
+      );
+      return;
+    }
+    config.reasoningEffort = value;
+    config.save();
+    stdout.writeln('\nReasoning effort set successfully');
+    _show(config);
+  }
+
   void _show(Config config) {
     stdout.writeln('Auto Commit CLI Configuration\n');
     var apiKey = config.apiKey;
@@ -60,6 +84,7 @@ class ConfigCommand extends Command {
     }
     stdout.writeln('API Key: $apiKey');
     stdout.writeln('Base URL: ${config.baseUrl}');
-    stdout.writeln('Model: ${config.model}\n');
+    stdout.writeln('Model: ${config.model}');
+    stdout.writeln('Reasoning Effort: ${config.reasoningEffort}\n');
   }
 }

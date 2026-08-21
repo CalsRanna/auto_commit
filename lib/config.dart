@@ -8,11 +8,13 @@ class Config {
   late String apiKey;
   late String baseUrl;
   late String model;
+  late String reasoningEffort;
 
   Config({
     this.apiKey = '',
     this.baseUrl = 'https://api.openai.com/v1',
     this.model = 'gpt-4o',
+    this.reasoningEffort = 'low',
   });
 
   Future<void> save() async {
@@ -27,6 +29,7 @@ class Config {
       'api_key: $apiKey',
       'base_url: $baseUrl',
       'model: $model',
+      'reasoning_effort: $reasoningEffort',
     ];
     await file.writeAsString(parts.join('\n'));
   }
@@ -40,6 +43,7 @@ class Config {
       apiKey: yaml['api_key']?.toString() ?? '',
       baseUrl: yaml['base_url']?.toString() ?? 'https://api.openai.com/v1',
       model: yaml['model']?.toString() ?? 'gpt-4o',
+      reasoningEffort: yaml['reasoning_effort']?.toString() ?? 'low',
     );
   }
 
